@@ -22,7 +22,7 @@
  * 
  * @param code the string with the GLSL shader code to analyze and parse
  */
-export function parseVariables(code: string) {
+export function parse(code: string) {
   // All code blocks will be removed from the input "code" string
   // and their contents will be placed on this "blocks" array.
   // i.e.
@@ -322,7 +322,7 @@ export interface GLSLVariable {
   // If this variable uses a struct the `structName` will contain the name of
   // the struct being used. This is useful to allow the struct attributes to be
   // found by searching for the struct with this name on the array of all
-  // `GLSLVariable`'s that is returned by `parseVariables()`.
+  // `GLSLVariable`'s that is returned by `parse()`.
   structName: string | null;
 }
 
@@ -842,7 +842,7 @@ export interface InputGLSLVariable extends GLSLVariable {
 }
 
 /**
- * This function returns true if a GLSLVariable is not set as a "out" variable.
+ * This function returns true if a GLSLVariable is not an "out" variable.
  **/
 export function isInputVariable(
   variable: GLSLVariable,

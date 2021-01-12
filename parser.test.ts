@@ -1,4 +1,4 @@
-import { GLSLVariable, parseVariables } from "./parser.ts";
+import { GLSLVariable, parse as parseVariables } from "./parser.ts";
 import {
   assert,
   assertEquals,

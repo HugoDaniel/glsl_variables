@@ -18,6 +18,10 @@ const variables = parse(`#version 300 es
 `);
 ```
 
+### Deno
+
+This package is [available for deno at deno.land](https://deno.land/x/glsl_variables).
+
 ## API
 
 `parse(code: string): GLSLVariable[]`

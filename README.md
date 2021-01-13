@@ -22,6 +22,7 @@ const variables = parse(`#version 300 es
 
 This package is [available for deno at deno.land](https://deno.land/x/glsl_variables).
 
+
 ## API
 
 `parse(code: string): GLSLVariable[]`
@@ -58,3 +59,18 @@ interface GLSLVariable {
 This type can handle the large majority of information available in GLSL variables. It supports uniform blocks, structs, layouts, invariants, centroids, arrays, and precision modifiers.
 
 The `GLSLType`, `GLSLPrecision`, and `Qualifier` defined above are not part of the exports. They reflect their respective concepts according to the spec of the GLSL version 300 language.
+
+### How it works ?
+
+This is a very simple parser for simple use cases only. It reads the shader
+code and returns an array of GLSLVariable's by applying the following actions
+on the shader code:
+
+1. Remove macros and comments
+2. Split by blocks { } and ( )
+3. Split by expressions (these end with a ';' char in GLSL) and:
+   * Read user defined types (these are 'structs' in GLSL)
+   * Read input and output variables into GLSLVariable objects.
+
+No macro expansion is done. If your shader macros are being used to define
+inputs then they will not show up on the returned array.

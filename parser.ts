@@ -102,6 +102,102 @@ export function parse(code: string) {
 }
 
 /**
+ * The type of a GLSL variable that is successfully parsed.
+ * It has the most common attributes that a variable can have in GLSL.
+ * 
+ * This is a recursive interface. It is being used in its declaration as the
+ * `block` array type.
+ */
+export interface GLSLVariable {
+  // The "struct" qualifier is used when declaring a struct; in which case the
+  // type will be "block" and the variables present on the struct present on
+  // the "block" array
+  qualifier: Qualifier | "struct";
+  // The type of this variable. It is "struct" when the variable is using a
+  // struct, in which case the name of the struct being used is passed on the
+  // attribute "structName".
+  type: GLSLType | "block" | "struct";
+  name: string;
+  // Amount is always 1 except for the cases where this variable is an array.
+  // If this variable is an array `amount` contains the size of it.
+  // i.e. for `float values[3];` amount will be 3.
+  amount: number;
+  // Invariant and Centroid are special variable attributes that GLSL allows
+  // It is important to consider them because they can have special IO
+  // considerations
+  isInvariant: boolean;
+  isCentroid: boolean;
+  // If a variable has the layout defined this attribute will contain the
+  // string used to set the layout
+  // i.e. `layout(location=1) in vec2 texcoord;` will make layout have the
+  // string "location=1". Strings have their spaces removed, this means that
+  // something like "layout( location = 3 )" will be placed here as
+  // "location=3".
+  layout: string | null;
+  // The precision modifier present on the variable declaration. This is not
+  // the precision set at the shader or block level. This is the precision
+  // modifier for a single variable declaration. Can be null if none is found.
+  precision: GLSLPrecision | null;
+  // If this variable is declaring a block (uniform buffer objects, or structs),
+  // then all the variables found inside the block will be available in this
+  // array.
+  block: GLSLVariable[] | null;
+  // If this variable uses a struct the `structName` will contain the name of
+  // the struct being used. This is useful to allow the struct attributes to be
+  // found by searching for the struct with this name on the array of all
+  // `GLSLVariable`'s that is returned by `parse()`.
+  structName: string | null;
+}
+
+/**
+ * Type-guard for the `GLSLVariable` interface. It makes sure that a given
+ * unknown value is a GLSLVariable interface.
+ */
+function isGLSLVariable(value: unknown): value is GLSLVariable {
+  return (
+    // A GLSLVariable must be an object
+    typeof value === "object" &&
+    // it cannot be null
+    value !== null &&
+    // it has got to have the "qualifier" attribute defined
+    "qualifier" in value &&
+    // and it has to be either a valid Qualifier type or the "struct" string
+    ((value as GLSLVariable).qualifier === "struct" ||
+      isQualifier((value as GLSLVariable).qualifier)) &&
+    // it has got to have the "type" attribute defined
+    "type" in value &&
+    // and it has to be either a valid GLSLType type or the "block" or "struct"
+    // strings
+    ((value as GLSLVariable).type === "block" ||
+      (value as GLSLVariable).type === "struct" ||
+      isGLSLType((value as GLSLVariable).type)) &&
+    // it has got to have the "name" attribute defined with the type "string"
+    "name" in value &&
+    typeof (value as GLSLVariable).name === "string" &&
+    // it has got to have the "amount" attribute defined with the type "number"
+    // and it is not a NaN
+    "amount" in value &&
+    typeof (value as GLSLVariable).amount === "number" &&
+    !isNaN((value as GLSLVariable).amount) &&
+    // the "isVariant" attribute must defined with the type "boolean"
+    "isInvariant" in value &&
+    typeof (value as GLSLVariable).isInvariant === "boolean" &&
+    // the "isCentroid" attribute must defined with the type "boolean"
+    "isCentroid" in value &&
+    typeof (value as GLSLVariable).isCentroid === "boolean" &&
+    // the "layout" attribute must defined and be either null or a string
+    "layout" in value &&
+    ((value as GLSLVariable).layout === null ||
+      typeof (value as GLSLVariable).layout === "string") &&
+    // the "precision" attribute must defined and be either null or a valid
+    // precision string
+    "precision" in value &&
+    ((value as GLSLVariable).precision === null ||
+      isGLSLPrecision((value as GLSLVariable).precision as string))
+  );
+}
+
+/**
  * This function reads the code and returns an array of found GLSLVariables.
  * This is a recursive function, it calls `readVariable()` to create a list of
  * `GLSLVariable`'s. The `readVariable()` function can call `readExpressions()`
@@ -277,102 +373,6 @@ function isQualifier(value: unknown): value is Qualifier {
   return (
     typeof value === "string" &&
     (value === "in" || value === "uniform" || value === "out")
-  );
-}
-
-/**
- * The type of a GLSL variable that is successfully parsed.
- * It has the most common attributes that a variable can have in GLSL.
- * 
- * This is a recursive interface. It is being used in its declaration as the
- * `block` array type.
- */
-export interface GLSLVariable {
-  // The "struct" qualifier is used when declaring a struct; in which case the
-  // type will be "block" and the variables present on the struct present on
-  // the "block" array
-  qualifier: Qualifier | "struct";
-  // The type of this variable. It is "struct" when the variable is using a
-  // struct, in which case the name of the struct being used is passed on the
-  // attribute "structName".
-  type: GLSLType | "block" | "struct";
-  name: string;
-  // Amount is always 1 except for the cases where this variable is an array.
-  // If this variable is an array `amount` contains the size of it.
-  // i.e. for `float values[3];` amount will be 3.
-  amount: number;
-  // Invariant and Centroid are special variable attributes that GLSL allows
-  // It is important to consider them because they can have special IO
-  // considerations
-  isInvariant: boolean;
-  isCentroid: boolean;
-  // If a variable has the layout defined this attribute will contain the
-  // string used to set the layout
-  // i.e. `layout(location=1) in vec2 texcoord;` will make layout have the
-  // string "location=1". Strings have their spaces removed, this means that
-  // something like "layout( location = 3 )" will be placed here as
-  // "location=3".
-  layout: string | null;
-  // The precision modifier present on the variable declaration. This is not
-  // the precision set at the shader or block level. This is the precision
-  // modifier for a single variable declaration. Can be null if none is found.
-  precision: GLSLPrecision | null;
-  // If this variable is declaring a block (uniform buffer objects, or structs),
-  // then all the variables found inside the block will be available in this
-  // array.
-  block: GLSLVariable[] | null;
-  // If this variable uses a struct the `structName` will contain the name of
-  // the struct being used. This is useful to allow the struct attributes to be
-  // found by searching for the struct with this name on the array of all
-  // `GLSLVariable`'s that is returned by `parse()`.
-  structName: string | null;
-}
-
-/**
- * Type-guard for the `GLSLVariable` interface. It makes sure that a given
- * unknown value is a GLSLVariable interface.
- */
-function isGLSLVariable(value: unknown): value is GLSLVariable {
-  return (
-    // A GLSLVariable must be an object
-    typeof value === "object" &&
-    // it cannot be null
-    value !== null &&
-    // it has got to have the "qualifier" attribute defined
-    "qualifier" in value &&
-    // and it has to be either a valid Qualifier type or the "struct" string
-    ((value as GLSLVariable).qualifier === "struct" ||
-      isQualifier((value as GLSLVariable).qualifier)) &&
-    // it has got to have the "type" attribute defined
-    "type" in value &&
-    // and it has to be either a valid GLSLType type or the "block" or "struct"
-    // strings
-    ((value as GLSLVariable).type === "block" ||
-      (value as GLSLVariable).type === "struct" ||
-      isGLSLType((value as GLSLVariable).type)) &&
-    // it has got to have the "name" attribute defined with the type "string"
-    "name" in value &&
-    typeof (value as GLSLVariable).name === "string" &&
-    // it has got to have the "amount" attribute defined with the type "number"
-    // and it is not a NaN
-    "amount" in value &&
-    typeof (value as GLSLVariable).amount === "number" &&
-    !isNaN((value as GLSLVariable).amount) &&
-    // the "isVariant" attribute must defined with the type "boolean"
-    "isInvariant" in value &&
-    typeof (value as GLSLVariable).isInvariant === "boolean" &&
-    // the "isCentroid" attribute must defined with the type "boolean"
-    "isCentroid" in value &&
-    typeof (value as GLSLVariable).isCentroid === "boolean" &&
-    // the "layout" attribute must defined and be either null or a string
-    "layout" in value &&
-    ((value as GLSLVariable).layout === null ||
-      typeof (value as GLSLVariable).layout === "string") &&
-    // the "precision" attribute must defined and be either null or a valid
-    // precision string
-    "precision" in value &&
-    ((value as GLSLVariable).precision === null ||
-      isGLSLPrecision((value as GLSLVariable).precision as string))
   );
 }
 

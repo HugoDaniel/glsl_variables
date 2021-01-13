@@ -1,3 +1,5 @@
+// Copyright 2021 Hugo Daniel Henriques Oliveira Gomes. All rights reserved.
+// Licensed under the EUPL
 /**
  * This function returns the list of parsed input/output variables in a shader
  * code string.

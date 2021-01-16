@@ -343,9 +343,13 @@ function replaceBlocks(
   blockEnd: string,
   replacer: (match: string) => string = () => "",
 ): string {
-  let result = code; // All changes are accumulated into this `result` variable.
   // Get an array with all the substrings delimited by the `blockStart` string.
   const blocks = code.split(blockStart);
+  // Return the original code if the split did not find the blockStart to split
+  if (blocks.length <= 1) {
+    return code;
+  }
+  let result = code; // All changes are accumulated into this `result` variable.
   // Run through all the strings and replace each of their contents up until the
   // location of the `blockEnd` string.
   for (let i = 0; i < blocks.length; i++) {

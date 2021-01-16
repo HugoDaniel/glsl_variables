@@ -9,20 +9,53 @@ import {
 Deno.test(
   "Can parse a single 'in' variable",
   () => {
-    const code = `
+    const hasSingleInVar = (code: string) => {
+      const variables = parseVariables(code);
+      assertEquals(variables.length, 1);
+      assertVariableIs(
+        variables[0],
+        { name: "a_position", type: "vec4", qualifier: "in" },
+      );
+    };
+    hasSingleInVar(`
     #version 300 es
     in vec4 a_position;
 
     void main() {
       gl_Position = a_position;
     }
-    `;
-    const variables = parseVariables(code);
-    assertEquals(variables.length, 1);
-    assertVariableIs(
-      variables[0],
-      { name: "a_position", type: "vec4", qualifier: "in" },
-    );
+    `);
+    hasSingleInVar(`
+    #version 300 es
+    
+    in vec4 a_position;
+
+    void main() {
+      gl_Position = a_position;
+    }
+    `);
+    hasSingleInVar(`
+    #version 300 es
+    in vec4 a_position;
+    void main() {
+      gl_Position = a_position;
+    }
+    `);
+    hasSingleInVar(`
+    #version 300 es
+    in vec4 a_position;
+    void main() {
+      gl_Position = a_position;
+    }
+    `.trim());
+    hasSingleInVar(`
+    #version 300 es
+    in vec4 a_position; void main() { gl_Position = a_position; }
+    `);
+    hasSingleInVar(`
+    #version 300 es
+    in vec4 a_position;;;;;void main() { gl_Position = a_position; }
+    `);
   },
 );
 

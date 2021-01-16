@@ -5,8 +5,9 @@ Reads a GLSL string and returns a parsed list of its variables. It only supports
 ## Usage
 
 Import the parser in your code and pass it a GLSL shader code string.
+
 ```typescript
-import { parse } from "./parser.ts";
+import { parse } from "https://deno.land/x/glsl_variables@v1.0.1/parser.ts";
 
 // This variable will be an array with a GLSLVariable for the "in vec4 a_position" as the first element.
 const variables = parse(`#version 300 es
@@ -22,20 +23,19 @@ const variables = parse(`#version 300 es
 
 This package is [available for deno at deno.land](https://deno.land/x/glsl_variables).
 
-
 ## API
 
 `parse(code: string): GLSLVariable[]`
 
-* The `parse` function is the entry point of the parser. Receives a GLSL version 300 string (WebGL 2.0 only) and produces a list of `GLSLVariable`.
+- The `parse` function is the entry point of the parser. Receives a GLSL version 300 string (WebGL 2.0 only) and produces a list of `GLSLVariable`.
 
 `isInputVariable(variable: GLSLVariable): boolean`
- 
-* This function returns true if a GLSLVariable is not an "out" variable.
+
+- This function returns true if a GLSLVariable is not an "out" variable.
 
 `isOutputVariable(variable: GLSLVariable): boolean`
- 
-* This function returns true if a GLSLVariable is an "out" variable.
+
+- This function returns true if a GLSLVariable is an "out" variable.
 
 ### Types
 
@@ -69,8 +69,8 @@ on the shader code:
 1. Remove macros and comments
 2. Split by blocks { } and ( )
 3. Split by expressions (these end with a ';' char in GLSL) and:
-   * Read user defined types (these are 'structs' in GLSL)
-   * Read input and output variables into GLSLVariable objects.
+   - Read user defined types (these are 'structs' in GLSL)
+   - Read input and output variables into GLSLVariable objects.
 
 No macro expansion is done. If your shader macros are being used to define
 inputs then they will not show up on the returned array.

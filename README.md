@@ -7,7 +7,7 @@ Reads a GLSL string and returns a parsed list of its variables. It only supports
 Import the parser in your code and pass it a GLSL shader code string.
 
 ```typescript
-import { parse } from "https://deno.land/x/glsl_variables@v1.0.1/parser.ts";
+import { parse } from "https://deno.land/x/glsl_variables@v1.0.2/parser.ts";
 
 // This variable will be an array with a GLSLVariable for the "in vec4 a_position" as the first element.
 const variables = parse(`#version 300 es
@@ -36,6 +36,10 @@ This package is [available for deno at deno.land](https://deno.land/x/glsl_varia
 `isOutputVariable(variable: GLSLVariable): boolean`
 
 - This function returns true if a GLSLVariable is an "out" variable.
+
+`isSamplerVariable( variable: GLSLVariable ): boolean`
+
+- This function returns true if a GLSLVariable is a "sampler" variable (like "sampler2D" textures, or any other kind of sampler uniform variable).
 
 ### Types
 

@@ -872,3 +872,58 @@ export function isOutputVariable(
 ): variable is OutputGLSLVariable {
   return variable.qualifier === "out";
 }
+
+/**
+ * A subset of the `GLSLVariable` that only allows sampler* type variables.
+ * Useful to get the textures among the variables.
+ **/
+export interface SamplerGLSLVariable extends GLSLVariable {
+  qualifier: "uniform";
+  type:
+    | "sampler2D"
+    | "sampler3D"
+    | "samplerCube"
+    | "samplerCubeShadow"
+    | "sampler2DShadow"
+    | "sampler2DArray"
+    | "sampler2DArrayShadow"
+    | "isampler2D"
+    | "isampler3D"
+    | "isamplerCube"
+    | "isampler2DArray"
+    | "usampler2D"
+    | "usampler3D"
+    | "usamplerCube"
+    | "usampler2DArray";
+}
+
+/**
+ * This function returns true if a GLSLVariable is a `sampler*` type variable.
+ **/
+export function isSamplerVariable(
+  variable: GLSLVariable,
+): variable is SamplerGLSLVariable {
+  if (variable.qualifier === "uniform") {
+    switch (variable.type) {
+      case "sampler2D":
+      case "sampler3D":
+      case "samplerCube":
+      case "samplerCubeShadow":
+      case "sampler2DShadow":
+      case "sampler2DArray":
+      case "sampler2DArrayShadow":
+      case "isampler2D":
+      case "isampler3D":
+      case "isamplerCube":
+      case "isampler2DArray":
+      case "usampler2D":
+      case "usampler3D":
+      case "usamplerCube":
+      case "usampler2DArray":
+        return true;
+      default:
+        return false;
+    }
+  }
+  return false;
+}

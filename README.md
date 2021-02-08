@@ -37,7 +37,7 @@ This package is [available for deno at deno.land](https://deno.land/x/glsl_varia
 
 - This function returns true if a GLSLVariable is an "out" variable.
 
-`isSamplerVariable( variable: GLSLVariable ): boolean`
+`isSamplerVariable(variable: GLSLVariable): boolean`
 
 - This function returns true if a GLSLVariable is a "sampler" variable (like "sampler2D" textures, or any other kind of sampler uniform variable).
 
